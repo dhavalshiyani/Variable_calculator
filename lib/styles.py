@@ -12,6 +12,6 @@ def ShowBanner():
     print(Fore.BLACK + Style.BRIGHT + 'Author: Dhaval Shiyani')
     print('Version: 1.0' + Style.RESET_ALL)
     print(Fore.BLACK + Style.DIM + '''MIT License
-Copyright (c) [2018] [Dhaval Shiyani]''' + Style.RESET_ALL)
+Copyright (c) [2018] [Dhaval Shiyani]''' + Style.RESET_ALL + '\n')
     
     return 0

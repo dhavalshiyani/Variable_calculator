@@ -8,22 +8,13 @@ import configinfo
 
 mu,Cmu = configinfo.constants()
 
-def turbcalc(mu, Cmu):
-    
-    #WIP to set defaults
-    #parser = argparse.ArgumentParser(description="Change default #solver type")
-    #parser.add_argument('--solvertype', default='blb', help='Choose a #Boundary Layer based solver (blb) or a Mixing length based solver #(mlb) -- Default: blb')
-    #args = parser.parse_args()
+def turbcalc(mu, Cmu, solverType):
   
     #User-input
     try:
         calcType = raw_input('\n'"Calculate boundary layer(\"del\") or inlet length(\"len\"): ")
-        solverType = raw_input("SolverType boundary layer based \"blb\" or Mixing length based \"mlb\": ")
-
         velocity = float(input('\n'"Enter freestream velocity: "))
         turb_intensity = (float(input("Enter turbulent intensity(%): ")))*0.01
-        
-        print(turb_intensity)
     
     except ValueError:
         PrintException()
@@ -40,11 +31,12 @@ def turbcalc(mu, Cmu):
         Re = float((velocity*ref_length)/mu)
         if Re < 2300:
             delta = 4.91*ref_length/(Re**(1.0/5.0))
-    else:
-        delta = 0.382*ref_length/(Re**(1.0/5.0)) 
+        else:
+            delta = 0.382*ref_length/(Re**(1.0/5.0)) 
     
     if calcType == 'len': #Fix this Re calculated before knowing the value
         delta = float(input("Enter boundary layer thickness: "))
+        Re = float((velocity*ref_length)/mu)
         if Re < 2300:
             ref_length = (delta*(Re**(1.0/5.0)))/4.91
         else:
@@ -77,9 +69,12 @@ def turbcalc(mu, Cmu):
     print '\n''k:', round(k, 6)
     print 'Epsilon:', round(epsilon, 6)
     print 'Omega:', round(omega, 6)
+    
+    print('\n')
+    print 'Type of solver used: ', solverType 
     print '--------------------------------------''\n'
 
-    return(Re, k, epsilon,omega, delta)
+    return(Re, k, epsilon, omega, delta)
 
 def timecalc():
 
