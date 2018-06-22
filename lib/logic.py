@@ -2,77 +2,84 @@ import sys
 import os
 import commands
 import math
-#from tabulate import tabulate
+import argparse
 import linecache
 import configinfo
 
 mu,Cmu = configinfo.constants()
 
 def turbcalc(mu, Cmu):
-  
-  #User-input
-  try:
-    calcType = raw_input('\n'"Calculate boundary layer(\"del\") or inlet length(\"len\"): ")
-    type_of_solver = raw_input("SolverType boundary layer based \"blb\" or Mixing length based \"mlb\": ")
-    #flow_type = raw_input("laminar \"l\" or turbulent \"t\": ")
-
-    velc = float(input('\n'"Enter freestream velocity: "))
-    input_turbint = float(input("Enter turbulent intensity(%): "))
     
-  except ValueError:
-    PrintException()
-    print'Match the words within \'\''
-    sys.exit(1)
+    #WIP to set defaults
+    #parser = argparse.ArgumentParser(description="Change default #solver type")
+    #parser.add_argument('--solvertype', default='blb', help='Choose a #Boundary Layer based solver (blb) or a Mixing length based solver #(mlb) -- Default: blb')
+    #args = parser.parse_args()
+  
+    #User-input
+    try:
+        calcType = raw_input('\n'"Calculate boundary layer(\"del\") or inlet length(\"len\"): ")
+        solverType = raw_input("SolverType boundary layer based \"blb\" or Mixing length based \"mlb\": ")
+
+        velocity = float(input('\n'"Enter freestream velocity: "))
+        turb_intensity = (float(input("Enter turbulent intensity(%): ")))*0.01
+        
+        print(turb_intensity)
+    
+    except ValueError:
+        PrintException()
+        print'Match the words within \'\''
+        sys.exit(1)
+
   #Basic_Calculations 
-  turbint = input_turbint*0.01
-  k = (1.5*((velc*turbint)**2))
+    k = (1.5*((velocity*turb_intensity)**2))
   
     
   #Case_Dependent Calculations:
-  if calcType == 'del':  
-    ref_l = float(input("Enter reference length: "))
-    Re = float((velc*ref_l)/mu)
-    if Re < 2300:
-      delta = 4.91*ref_l/(Re**(1.0/5.0))
+    if calcType == 'del':  
+        ref_length = float(input("Enter reference length: "))
+        Re = float((velocity*ref_length)/mu)
+        if Re < 2300:
+            delta = 4.91*ref_length/(Re**(1.0/5.0))
     else:
-      delta = 0.382*ref_l/(Re**(1.0/5.0)) 
-  if calcType == 'len': #Fix this Re calculated before knowing the value
-      delta = float(input("Enter boundary layer thickness: "))
-      if Re < 2300:
-        ref_l = (delta*(Re**(1.0/5.0)))/4.91
-      else:
-        ref_l = (delta*(Re**(1.0/5.0)))/0.382      
-        Re = float((velc*ref_l)/mu)
+        delta = 0.382*ref_length/(Re**(1.0/5.0)) 
+    
+    if calcType == 'len': #Fix this Re calculated before knowing the value
+        delta = float(input("Enter boundary layer thickness: "))
+        if Re < 2300:
+            ref_length = (delta*(Re**(1.0/5.0)))/4.91
+        else:
+            ref_length = (delta*(Re**(1.0/5.0)))/0.382      
+            Re = float((velocity*ref_length)/mu)
 
-  if type_of_solver == 'blb':
-    l = (0.22*delta)
-    epsilon = (Cmu*((k**1.5)/l))
-    omega = ((math.sqrt(k))/l)
+    if solverType == 'blb':
+        l = (0.22*delta)
+        epsilon = (Cmu*((k**1.5)/l))
+        omega = ((math.sqrt(k))/l)
 
-  if type_of_solver == 'mlb':
-    l = (0.4*delta)
-    epsilon = ((Cmu**(3.0/4.0))*((k**1.5)/l))
-    omega = ((Cmu**(-1.0/4.0))*((math.sqrt(k))/l)) 
- 
-  
+    if solverType == 'mlb':
+        l = (0.4*delta)
+        epsilon = ((Cmu**(3.0/4.0))*((k**1.5)/l))
+        omega = ((Cmu**(-1.0/4.0))*((math.sqrt(k))/l)) 
+
+
   #Output
-  print '\n''Output:'
-  print '--------------------------------------'
-  if Re > 2300:
-    print 'Flow is TURBULENT'
-  else:
-    print 'Flow is LAMINAR'
+    print '\n''Output:'
+    print '--------------------------------------'
+    if Re > 2300:
+        print 'Flow is TURBULENT'
+    else:
+        print 'Flow is LAMINAR'
 
-  print '\n''Re:', round(Re, 4) 
-  print 'Boundary layer thickness:', round(delta, 6), ' m'
-  print 'Mixing length(l):', round(l, 4)
+    print '\n''Re:', round(Re, 4) 
+    print 'Boundary layer thickness:', round(delta, 6), ' m'
+    print 'Mixing length(l):', round(l, 4)
 
-  print '\n''k:', round(k, 6)
-  print 'Epsilon:', round(epsilon, 6)
-  print 'Omega:', round(omega, 6)
-  print '--------------------------------------''\n'
+    print '\n''k:', round(k, 6)
+    print 'Epsilon:', round(epsilon, 6)
+    print 'Omega:', round(omega, 6)
+    print '--------------------------------------''\n'
 
-  return(Re, k, epsilon,omega, delta)
+    return(Re, k, epsilon,omega, delta)
 
 def timecalc():
 
@@ -80,7 +87,7 @@ def timecalc():
   l = float(input('\n'"Enter length of the edge (m): "))
   n = float(input("Enter number of divisions (n): "))
   R = float(input("Enter bias factor (R): "))
-  velc = float(input("Enter freestream velocity (m/s): "))
+  velocity = float(input("Enter freestream velocity (m/s): "))
   
   #Small r calc:
   try:
@@ -106,7 +113,7 @@ def timecalc():
     deltax_s = l/n  
 
   #Time-step calc
-  delta_t = (1.0*deltax_s)/velc 
+  delta_t = (1.0*deltax_s)/velocity 
   
   #Output:
   print '\n''Output:'
